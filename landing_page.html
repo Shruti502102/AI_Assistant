@@ -381,7 +381,7 @@
                 </div>
                 
                 <div class="note">
-                    <strong>Note:</strong> This is a demo version. For full AI functionality, you'll need to connect to a backend service.
+                    <strong>Demo Mode:</strong> This version works entirely in your browser without requiring a backend server. Upload a text file to see content extraction, or try PDF/DOC files to see the demo flow. For full AI capabilities, connect to a backend service with document processing libraries.
                 </div>
             </section>
 
@@ -508,24 +508,69 @@
         }
 
         function processFile(file) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.txt')) {
+                alert('Please upload a PDF, TXT, DOC, or DOCX file.');
+                return;
+            }
+
             // Show progress
             uploadProgress.classList.remove('hidden');
             
-            // Simulate file processing
-            setTimeout(() => {
-                currentDocument = {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    lastModified: file.lastModified,
-                    content: "This is a demo version. The actual content would be extracted from the uploaded file."
-                };
+            // Read file content for demo purposes
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let content = '';
                 
-                displayDocumentSummary();
+                if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                    content = e.target.result;
+                } else {
+                    content = `This is a demo version. Content extraction for ${file.type} files would require backend processing.`;
+                }
+                
+                // Simulate processing time
+                setTimeout(() => {
+                    currentDocument = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        lastModified: file.lastModified,
+                        content: content.substring(0, 500) + (content.length > 500 ? '...' : '')
+                    };
+                    
+                    displayDocumentSummary();
+                    uploadProgress.classList.add('hidden');
+                    summarySection.classList.remove('hidden');
+                    modeSection.classList.remove('hidden');
+                }, 1500);
+            };
+            
+            reader.onerror = function() {
                 uploadProgress.classList.add('hidden');
-                summarySection.classList.remove('hidden');
-                modeSection.classList.remove('hidden');
-            }, 2000);
+                alert('Error reading file. Please try again.');
+            };
+            
+            // Read as text for demo
+            if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                reader.readAsText(file);
+            } else {
+                // For non-text files, just process without reading content
+                setTimeout(() => {
+                    currentDocument = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        lastModified: file.lastModified,
+                        content: `This is a demo version. Content extraction for ${file.type} files would require backend processing with libraries like PyPDF2 or python-docx.`
+                    };
+                    
+                    displayDocumentSummary();
+                    uploadProgress.classList.add('hidden');
+                    summarySection.classList.remove('hidden');
+                    modeSection.classList.remove('hidden');
+                }, 1500);
+            }
         }
 
         function displayDocumentSummary() {
@@ -537,7 +582,10 @@
                 <p><strong>Size:</strong> ${(currentDocument.size / 1024).toFixed(2)} KB</p>
                 <p><strong>Type:</strong> ${currentDocument.type}</p>
                 <p><strong>Last Modified:</strong> ${new Date(currentDocument.lastModified).toLocaleString()}</p>
-                <p><strong>Summary:</strong> ${currentDocument.content}</p>
+                <p><strong>Content Preview:</strong></p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                    <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${currentDocument.content}</pre>
+                </div>
             `;
         }
 
@@ -562,17 +610,34 @@
             addChatMessage('user', message);
             questionInput.value = '';
             
-            // Simulate AI response
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message assistant typing';
+            typingDiv.innerHTML = '<span>AI is typing...</span>';
+            chatHistory.appendChild(typingDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            
+            // Simulate AI response based on document content
             setTimeout(() => {
-                const responses = [
-                    "Based on the document, I can tell you that...",
-                    "That's an interesting question! From what I can see in the document...",
-                    "Let me analyze that for you. The document mentions...",
-                    "Good question! Here's what I found in the document..."
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addChatMessage('assistant', randomResponse + " (This is a demo response. Connect to a backend for actual AI processing.)");
-            }, 1000);
+                chatHistory.removeChild(typingDiv);
+                
+                let response = "";
+                if (currentDocument && currentDocument.content) {
+                    if (message.toLowerCase().includes('summary') || message.toLowerCase().includes('about')) {
+                        response = `Based on the document "${currentDocument.name}", here's what I can tell you: ${currentDocument.content.substring(0, 300)}...`;
+                    } else if (message.toLowerCase().includes('size') || message.toLowerCase().includes('length')) {
+                        response = `The document "${currentDocument.name}" is ${(currentDocument.size / 1024).toFixed(2)} KB in size.`;
+                    } else if (message.toLowerCase().includes('type') || message.toLowerCase().includes('format')) {
+                        response = `This document is a ${currentDocument.type} file.`;
+                    } else {
+                        response = `I understand you're asking about "${message}". In a full implementation, I would analyze the document content to provide specific answers. For now, I can tell you that the document contains: ${currentDocument.content.substring(0, 200)}...`;
+                    }
+                } else {
+                    response = "I need a document to be uploaded first before I can answer questions about it.";
+                }
+                
+                addChatMessage('assistant', response);
+            }, 1000 + Math.random() * 2000);
         }
 
         function addChatMessage(sender, message) {
