@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-area {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+        .note {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Assistant</h1>
+        
+        <div class="note">
+            <strong>Note:</strong> This is a static demo version. For full functionality, you'll need to run the Flask application locally with the backend components.
+        </div>
+        
+        <div class="upload-area">
+            <h3>Upload Document</h3>
+            <input type="file" id="fileInput" accept=".pdf,.txt,.doc,.docx">
+            <br>
+            <button onclick="uploadFile()">Upload Document</button>
+        </div>
+        
+        <div class="result-area" id="resultArea">
+            <h3>Results will appear here</h3>
+            <p>Upload a document to get started with AI-powered analysis and question generation.</p>
+        </div>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const resultArea = document.getElementById('resultArea');
+            
+            if (!fileInput.files.length) {
+                alert('Please select a file first!');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Since this is a static demo, we'll just show file info
+            resultArea.innerHTML = `
+                <h3>File Information</h3>
+                <p><strong>Name:</strong> ${file.name}</p>
+                <p><strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
+                <p><strong>Type:</strong> ${file.type}</p>
+                <p><strong>Last Modified:</strong> ${new Date(file.lastModified).toLocaleString()}</p>
+                <br>
+                <div style="background-color: #d4edda; padding: 10px; border-radius: 5px; border-left: 4px solid #28a745;">
+                    <strong>Demo Mode:</strong> To process this document with AI, please run the Flask application locally using the backend components.
+                </div>
+            `;
+        }
+        
+        // Handle drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#007bff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ddd';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ddd';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+            }
+        });
+    </script>
+</body>
+</html>
