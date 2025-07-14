@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document AI Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Document AI Assistant</h1>
+            <p>Upload a document and interact with it using AI-powered analysis</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section id="upload-section" class="section">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <h3>Upload Your Document</h3>
+                    <p>Drag and drop a PDF or TXT file here, or click to browse</p>
+                    <input type="file" id="file-input" accept=".pdf,.txt" hidden>
+                    <button id="browse-btn" class="btn btn-primary">Browse Files</button>
+                </div>
+                <div id="upload-progress" class="progress-bar hidden">
+                    <div class="progress-fill"></div>
+                    <span class="progress-text">Processing document...</span>
+                </div>
+            </section>
+
+            <!-- Document Summary Section -->
+            <section id="summary-section" class="section hidden">
+                <h2>📋 Document Summary</h2>
+                <div id="document-info" class="info-box">
+                    <div class="filename"></div>
+                    <div class="summary"></div>
+                </div>
+            </section>
+
+            <!-- Interaction Mode Selection -->
+            <section id="mode-section" class="section hidden">
+                <h2>🤖 Choose Interaction Mode</h2>
+                <div class="mode-buttons">
+                    <button id="ask-mode-btn" class="btn btn-mode">
+                        <span class="mode-icon">💬</span>
+                        <span class="mode-title">Ask Anything</span>
+                        <span class="mode-desc">Ask questions about the document</span>
+                    </button>
+                    <button id="challenge-mode-btn" class="btn btn-mode">
+                        <span class="mode-icon">🎯</span>
+                        <span class="mode-title">Challenge Me</span>
+                        <span class="mode-desc">Test your understanding</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Ask Mode Section -->
+            <section id="ask-section" class="section hidden">
+                <h2>💬 Ask Anything</h2>
+                <div class="chat-container">
+                    <div id="chat-history" class="chat-history"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="question-input" placeholder="Ask a question about the document..." class="chat-input">
+                        <button id="send-btn" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Challenge Mode Section -->
+            <section id="challenge-section" class="section hidden">
+                <h2>🎯 Challenge Mode</h2>
+                <div id="challenge-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Generating questions...</p>
+                </div>
+                <div id="challenge-questions" class="questions-container hidden"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
