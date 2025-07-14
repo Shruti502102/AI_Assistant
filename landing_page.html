@@ -3,137 +3,661 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant</title>
+    <title>Document AI Assistant</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
         }
-        .container {
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .section {
             background: white;
+            border-radius: 15px;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
             margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
         }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
         .upload-area {
-            border: 2px dashed #ddd;
-            padding: 40px;
+            border: 3px dashed #ddd;
+            padding: 60px 30px;
             text-align: center;
-            margin: 20px 0;
-            border-radius: 8px;
-            background-color: #fafafa;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
+
         .upload-area:hover {
             border-color: #007bff;
-            background-color: #f0f8ff;
+            background: linear-gradient(45deg, #e3f2fd, #f0f8ff);
+            transform: scale(1.02);
         }
-        input[type="file"] {
-            margin: 10px 0;
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
         }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .upload-area h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
         }
-        .result-area {
-            margin-top: 20px;
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+
+        .btn-mode {
+            background: white;
+            border: 2px solid #e9ecef;
             padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            min-height: 100px;
+            margin: 10px;
+            text-align: center;
+            min-width: 200px;
+            display: inline-block;
         }
+
+        .btn-mode:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .mode-title {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .mode-desc {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 25px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progress-animation 2s ease-in-out infinite;
+        }
+
+        @keyframes progress-animation {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .filename {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .summary {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+
+        .chat-message.user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .chat-message.assistant {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #007bff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .questions-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .question-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .option-btn.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option-btn.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
         .note {
-            background-color: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
             border-left: 4px solid #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .mode-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-mode {
+                width: 100%;
+                max-width: 300px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AI Assistant</h1>
-        
-        <div class="note">
-            <strong>Note:</strong> This is a static demo version. For full functionality, you'll need to run the Flask application locally with the backend components.
-        </div>
-        
-        <div class="upload-area">
-            <h3>Upload Document</h3>
-            <input type="file" id="fileInput" accept=".pdf,.txt,.doc,.docx">
-            <br>
-            <button onclick="uploadFile()">Upload Document</button>
-        </div>
-        
-        <div class="result-area" id="resultArea">
-            <h3>Results will appear here</h3>
-            <p>Upload a document to get started with AI-powered analysis and question generation.</p>
-        </div>
+        <header>
+            <h1>📄 Document AI Assistant</h1>
+            <p>Upload a document and interact with it using AI-powered analysis</p>
+        </header>
+        <main>
+            <!-- Upload Section -->
+            <section id="upload-section" class="section">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <h3>Upload Your Document</h3>
+                    <p>Drag and drop a PDF or TXT file here, or click to browse</p>
+                    <input type="file" id="file-input" accept=".pdf,.txt,.doc,.docx" hidden>
+                    <button id="browse-btn" class="btn btn-primary">Browse Files</button>
+                </div>
+                <div id="upload-progress" class="progress-bar hidden">
+                    <div class="progress-fill"></div>
+                    <span class="progress-text">Processing document...</span>
+                </div>
+                
+                <div class="note">
+                    <strong>Note:</strong> This is a demo version. For full AI functionality, you'll need to connect to a backend service.
+                </div>
+            </section>
+
+            <!-- Document Summary Section -->
+            <section id="summary-section" class="section hidden">
+                <h2>📋 Document Summary</h2>
+                <div id="document-info" class="info-box">
+                    <div class="filename"></div>
+                    <div class="summary"></div>
+                </div>
+            </section>
+
+            <!-- Interaction Mode Selection -->
+            <section id="mode-section" class="section hidden">
+                <h2>🤖 Choose Interaction Mode</h2>
+                <div class="mode-buttons">
+                    <button id="ask-mode-btn" class="btn btn-mode">
+                        <span class="mode-icon">💬</span>
+                        <span class="mode-title">Ask Anything</span>
+                        <span class="mode-desc">Ask questions about the document</span>
+                    </button>
+                    <button id="challenge-mode-btn" class="btn btn-mode">
+                        <span class="mode-icon">🎯</span>
+                        <span class="mode-title">Challenge Me</span>
+                        <span class="mode-desc">Test your understanding</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Ask Mode Section -->
+            <section id="ask-section" class="section hidden">
+                <h2>💬 Ask Anything</h2>
+                <div class="chat-container">
+                    <div id="chat-history" class="chat-history"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="question-input" placeholder="Ask a question about the document..." class="chat-input">
+                        <button id="send-btn" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Challenge Mode Section -->
+            <section id="challenge-section" class="section hidden">
+                <h2>🎯 Challenge Mode</h2>
+                <div id="challenge-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Generating questions...</p>
+                </div>
+                <div id="challenge-questions" class="questions-container hidden"></div>
+            </section>
+        </main>
     </div>
 
     <script>
-        function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const resultArea = document.getElementById('resultArea');
+        // Global variables
+        let currentDocument = null;
+        let currentMode = null;
+
+        // DOM elements
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const browseBtn = document.getElementById('browse-btn');
+        const uploadProgress = document.getElementById('upload-progress');
+        const summarySection = document.getElementById('summary-section');
+        const modeSection = document.getElementById('mode-section');
+        const askSection = document.getElementById('ask-section');
+        const challengeSection = document.getElementById('challenge-section');
+        const documentInfo = document.getElementById('document-info');
+        const chatHistory = document.getElementById('chat-history');
+        const questionInput = document.getElementById('question-input');
+        const sendBtn = document.getElementById('send-btn');
+        const askModeBtn = document.getElementById('ask-mode-btn');
+        const challengeModeBtn = document.getElementById('challenge-mode-btn');
+
+        // Initialize event listeners
+        function init() {
+            // File upload events
+            browseBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
             
-            if (!fileInput.files.length) {
-                alert('Please select a file first!');
-                return;
+            // Drag and drop events
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            // Mode selection events
+            askModeBtn.addEventListener('click', () => setMode('ask'));
+            challengeModeBtn.addEventListener('click', () => setMode('challenge'));
+            
+            // Chat events
+            sendBtn.addEventListener('click', sendMessage);
+            questionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        }
+
+        // File handling functions
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
             }
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
             
-            const file = fileInput.files[0];
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function processFile(file) {
+            // Show progress
+            uploadProgress.classList.remove('hidden');
             
-            // Since this is a static demo, we'll just show file info
-            resultArea.innerHTML = `
-                <h3>File Information</h3>
-                <p><strong>Name:</strong> ${file.name}</p>
-                <p><strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB</p>
-                <p><strong>Type:</strong> ${file.type}</p>
-                <p><strong>Last Modified:</strong> ${new Date(file.lastModified).toLocaleString()}</p>
-                <br>
-                <div style="background-color: #d4edda; padding: 10px; border-radius: 5px; border-left: 4px solid #28a745;">
-                    <strong>Demo Mode:</strong> To process this document with AI, please run the Flask application locally using the backend components.
-                </div>
+            // Simulate file processing
+            setTimeout(() => {
+                currentDocument = {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastModified: file.lastModified,
+                    content: "This is a demo version. The actual content would be extracted from the uploaded file."
+                };
+                
+                displayDocumentSummary();
+                uploadProgress.classList.add('hidden');
+                summarySection.classList.remove('hidden');
+                modeSection.classList.remove('hidden');
+            }, 2000);
+        }
+
+        function displayDocumentSummary() {
+            const filename = documentInfo.querySelector('.filename');
+            const summary = documentInfo.querySelector('.summary');
+            
+            filename.textContent = `📄 ${currentDocument.name}`;
+            summary.innerHTML = `
+                <p><strong>Size:</strong> ${(currentDocument.size / 1024).toFixed(2)} KB</p>
+                <p><strong>Type:</strong> ${currentDocument.type}</p>
+                <p><strong>Last Modified:</strong> ${new Date(currentDocument.lastModified).toLocaleString()}</p>
+                <p><strong>Summary:</strong> ${currentDocument.content}</p>
             `;
         }
-        
-        // Handle drag and drop
-        const uploadArea = document.querySelector('.upload-area');
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#007bff';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#ddd';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#ddd';
+
+        function setMode(mode) {
+            currentMode = mode;
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('fileInput').files = files;
+            if (mode === 'ask') {
+                askSection.classList.remove('hidden');
+                challengeSection.classList.add('hidden');
+                addChatMessage('assistant', 'Hi! I\'m ready to answer questions about your document. What would you like to know?');
+            } else if (mode === 'challenge') {
+                askSection.classList.add('hidden');
+                challengeSection.classList.remove('hidden');
+                generateChallengeQuestions();
             }
-        });
+        }
+
+        function sendMessage() {
+            const message = questionInput.value.trim();
+            if (!message) return;
+            
+            addChatMessage('user', message);
+            questionInput.value = '';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = [
+                    "Based on the document, I can tell you that...",
+                    "That's an interesting question! From what I can see in the document...",
+                    "Let me analyze that for you. The document mentions...",
+                    "Good question! Here's what I found in the document..."
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addChatMessage('assistant', randomResponse + " (This is a demo response. Connect to a backend for actual AI processing.)");
+            }, 1000);
+        }
+
+        function addChatMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = message;
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function generateChallengeQuestions() {
+            const loadingDiv = document.getElementById('challenge-loading');
+            const questionsDiv = document.getElementById('challenge-questions');
+            
+            loadingDiv.classList.remove('hidden');
+            questionsDiv.classList.add('hidden');
+            
+            // Simulate question generation
+            setTimeout(() => {
+                const sampleQuestions = [
+                    {
+                        question: "What is the main topic of this document?",
+                        options: [
+                            "Technology trends",
+                            "Business strategy",
+                            "Scientific research",
+                            "Educational content"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "According to the document, what is the most important consideration?",
+                        options: [
+                            "Cost efficiency",
+                            "User experience",
+                            "Performance optimization",
+                            "Security measures"
+                        ],
+                        correct: 1
+                    }
+                ];
+                
+                displayChallengeQuestions(sampleQuestions);
+                loadingDiv.classList.add('hidden');
+                questionsDiv.classList.remove('hidden');
+            }, 2000);
+        }
+
+        function displayChallengeQuestions(questions) {
+            const questionsContainer = document.getElementById('challenge-questions');
+            questionsContainer.innerHTML = '';
+            
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-item';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <div class="question-options">
+                        ${q.options.map((option, optIndex) => `
+                            <button class="option-btn" onclick="selectAnswer(${index}, ${optIndex}, ${q.correct})">
+                                ${String.fromCharCode(65 + optIndex)}. ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+        function selectAnswer(questionIndex, selectedIndex, correctIndex) {
+            const questionDiv = document.querySelectorAll('.question-item')[questionIndex];
+            const options = questionDiv.querySelectorAll('.option-btn');
+            
+            options.forEach((option, index) => {
+                option.disabled = true;
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== correctIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+        }
+
+        // Initialize the application
+        init();
     </script>
 </body>
 </html>
