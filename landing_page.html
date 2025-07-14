@@ -489,16 +489,19 @@
 
         function handleDragOver(event) {
             event.preventDefault();
+            event.stopPropagation();
             uploadArea.classList.add('dragover');
         }
 
         function handleDragLeave(event) {
             event.preventDefault();
+            event.stopPropagation();
             uploadArea.classList.remove('dragover');
         }
 
         function handleDrop(event) {
             event.preventDefault();
+            event.stopPropagation();
             uploadArea.classList.remove('dragover');
             
             const files = event.dataTransfer.files;
@@ -510,7 +513,9 @@
         function processFile(file) {
             // Validate file type
             const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.txt')) {
+            const fileName = file.name.toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !fileName.endsWith('.txt') && !fileName.endsWith('.pdf') && !fileName.endsWith('.doc') && !fileName.endsWith('.docx')) {
                 alert('Please upload a PDF, TXT, DOC, or DOCX file.');
                 return;
             }
@@ -518,51 +523,54 @@
             // Show progress
             uploadProgress.classList.remove('hidden');
             
-            // Read file content for demo purposes
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                let content = '';
+            // Process different file types
+            if (file.type === 'text/plain' || fileName.endsWith('.txt')) {
+                // Read text files directly
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    setTimeout(() => {
+                        currentDocument = {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type || 'text/plain',
+                            lastModified: file.lastModified,
+                            content: content.substring(0, 1000) + (content.length > 1000 ? '...' : ''),
+                            fullContent: content
+                        };
+                        
+                        displayDocumentSummary();
+                        uploadProgress.classList.add('hidden');
+                        summarySection.classList.remove('hidden');
+                        modeSection.classList.remove('hidden');
+                    }, 1000);
+                };
                 
-                if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                    content = e.target.result;
-                } else {
-                    content = `This is a demo version. Content extraction for ${file.type} files would require backend processing.`;
-                }
-                
-                // Simulate processing time
-                setTimeout(() => {
-                    currentDocument = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        lastModified: file.lastModified,
-                        content: content.substring(0, 500) + (content.length > 500 ? '...' : '')
-                    };
-                    
-                    displayDocumentSummary();
+                reader.onerror = function() {
                     uploadProgress.classList.add('hidden');
-                    summarySection.classList.remove('hidden');
-                    modeSection.classList.remove('hidden');
-                }, 1500);
-            };
-            
-            reader.onerror = function() {
-                uploadProgress.classList.add('hidden');
-                alert('Error reading file. Please try again.');
-            };
-            
-            // Read as text for demo
-            if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                    alert('Error reading file. Please try again.');
+                };
+                
                 reader.readAsText(file);
             } else {
-                // For non-text files, just process without reading content
+                // For PDF, DOC, DOCX files - simulate processing
                 setTimeout(() => {
+                    let demoContent = '';
+                    if (fileName.endsWith('.pdf')) {
+                        demoContent = `This is a PDF document. In a full implementation, this would be processed using libraries like PDF.js or PyPDF2 to extract text content. The document appears to contain ${Math.floor(Math.random() * 10) + 1} pages of content.`;
+                    } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+                        demoContent = `This is a Word document. In a full implementation, this would be processed using libraries like python-docx or mammoth.js to extract text content. The document appears to contain formatted text with potential headings and paragraphs.`;
+                    } else {
+                        demoContent = `This document format would require specialized processing libraries for content extraction.`;
+                    }
+                    
                     currentDocument = {
                         name: file.name,
                         size: file.size,
                         type: file.type,
                         lastModified: file.lastModified,
-                        content: `This is a demo version. Content extraction for ${file.type} files would require backend processing with libraries like PyPDF2 or python-docx.`
+                        content: demoContent,
+                        fullContent: demoContent
                     };
                     
                     displayDocumentSummary();
@@ -607,37 +615,79 @@
             const message = questionInput.value.trim();
             if (!message) return;
             
+            if (!currentDocument) {
+                alert('Please upload a document first!');
+                return;
+            }
+            
             addChatMessage('user', message);
             questionInput.value = '';
+            sendBtn.disabled = true;
             
             // Show typing indicator
             const typingDiv = document.createElement('div');
-            typingDiv.className = 'chat-message assistant typing';
-            typingDiv.innerHTML = '<span>AI is typing...</span>';
+            typingDiv.className = 'chat-message assistant';
+            typingDiv.innerHTML = '<em>AI is thinking...</em>';
             chatHistory.appendChild(typingDiv);
             chatHistory.scrollTop = chatHistory.scrollHeight;
             
-            // Simulate AI response based on document content
+            // Generate contextual response based on document content
             setTimeout(() => {
                 chatHistory.removeChild(typingDiv);
                 
-                let response = "";
-                if (currentDocument && currentDocument.content) {
-                    if (message.toLowerCase().includes('summary') || message.toLowerCase().includes('about')) {
-                        response = `Based on the document "${currentDocument.name}", here's what I can tell you: ${currentDocument.content.substring(0, 300)}...`;
-                    } else if (message.toLowerCase().includes('size') || message.toLowerCase().includes('length')) {
-                        response = `The document "${currentDocument.name}" is ${(currentDocument.size / 1024).toFixed(2)} KB in size.`;
-                    } else if (message.toLowerCase().includes('type') || message.toLowerCase().includes('format')) {
-                        response = `This document is a ${currentDocument.type} file.`;
-                    } else {
-                        response = `I understand you're asking about "${message}". In a full implementation, I would analyze the document content to provide specific answers. For now, I can tell you that the document contains: ${currentDocument.content.substring(0, 200)}...`;
-                    }
-                } else {
-                    response = "I need a document to be uploaded first before I can answer questions about it.";
-                }
-                
+                let response = generateResponse(message, currentDocument);
                 addChatMessage('assistant', response);
+                sendBtn.disabled = false;
             }, 1000 + Math.random() * 2000);
+        }
+
+        function generateResponse(question, document) {
+            const lowerQuestion = question.toLowerCase();
+            
+            // File info questions
+            if (lowerQuestion.includes('size') || lowerQuestion.includes('how big')) {
+                return `The document "${document.name}" is ${(document.size / 1024).toFixed(2)} KB in size.`;
+            }
+            
+            if (lowerQuestion.includes('type') || lowerQuestion.includes('format') || lowerQuestion.includes('kind')) {
+                return `This is a ${document.type} file named "${document.name}".`;
+            }
+            
+            if (lowerQuestion.includes('when') || lowerQuestion.includes('modified') || lowerQuestion.includes('created')) {
+                return `The document was last modified on ${new Date(document.lastModified).toLocaleString()}.`;
+            }
+            
+            // Content questions
+            if (lowerQuestion.includes('summary') || lowerQuestion.includes('about') || lowerQuestion.includes('content')) {
+                return `Here's what I can tell you about "${document.name}": ${document.content}`;
+            }
+            
+            if (lowerQuestion.includes('length') || lowerQuestion.includes('long') || lowerQuestion.includes('words')) {
+                const wordCount = document.fullContent ? document.fullContent.split(/\s+/).length : 'unknown';
+                return `The document contains approximately ${wordCount} words.`;
+            }
+            
+            if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi')) {
+                return `Hello! I'm ready to help you with questions about "${document.name}". What would you like to know?`;
+            }
+            
+            // Search for keywords in content
+            const keywords = question.split(' ').filter(word => word.length > 3);
+            const content = document.fullContent || document.content;
+            let foundKeywords = [];
+            
+            keywords.forEach(keyword => {
+                if (content.toLowerCase().includes(keyword.toLowerCase())) {
+                    foundKeywords.push(keyword);
+                }
+            });
+            
+            if (foundKeywords.length > 0) {
+                return `I found mentions of "${foundKeywords.join('", "')}" in the document. Here's the relevant context: ${content.substring(0, 300)}...`;
+            }
+            
+            // Default response
+            return `I understand you're asking about "${question}". Based on the document "${document.name}", I can see: ${content.substring(0, 200)}... Feel free to ask more specific questions about the content!`;
         }
 
         function addChatMessage(sender, message) {
@@ -652,38 +702,76 @@
             const loadingDiv = document.getElementById('challenge-loading');
             const questionsDiv = document.getElementById('challenge-questions');
             
+            if (!currentDocument) {
+                questionsDiv.innerHTML = '<p>Please upload a document first to generate challenge questions.</p>';
+                questionsDiv.classList.remove('hidden');
+                return;
+            }
+            
             loadingDiv.classList.remove('hidden');
             questionsDiv.classList.add('hidden');
             
-            // Simulate question generation
+            // Generate questions based on document content
             setTimeout(() => {
-                const sampleQuestions = [
-                    {
-                        question: "What is the main topic of this document?",
-                        options: [
-                            "Technology trends",
-                            "Business strategy",
-                            "Scientific research",
-                            "Educational content"
-                        ],
-                        correct: 0
-                    },
-                    {
-                        question: "According to the document, what is the most important consideration?",
-                        options: [
-                            "Cost efficiency",
-                            "User experience",
-                            "Performance optimization",
-                            "Security measures"
-                        ],
-                        correct: 1
-                    }
-                ];
-                
-                displayChallengeQuestions(sampleQuestions);
+                const questions = createQuestionsFromDocument(currentDocument);
+                displayChallengeQuestions(questions);
                 loadingDiv.classList.add('hidden');
                 questionsDiv.classList.remove('hidden');
             }, 2000);
+        }
+
+        function createQuestionsFromDocument(document) {
+            const questions = [
+                {
+                    question: `What is the filename of the uploaded document?`,
+                    options: [
+                        document.name,
+                        `${document.name}.backup`,
+                        `copy_${document.name}`,
+                        `${document.name}_old`
+                    ],
+                    correct: 0
+                },
+                {
+                    question: `What is the approximate size of this document?`,
+                    options: [
+                        `${(document.size / 1024).toFixed(2)} KB`,
+                        `${(document.size / 1024 / 1024).toFixed(2)} MB`,
+                        `${document.size} bytes`,
+                        `${(document.size * 2 / 1024).toFixed(2)} KB`
+                    ],
+                    correct: 0
+                },
+                {
+                    question: `What type of file is this document?`,
+                    options: [
+                        document.type || 'text/plain',
+                        'application/json',
+                        'image/png',
+                        'video/mp4'
+                    ],
+                    correct: 0
+                }
+            ];
+
+            // Add content-based questions for text files
+            if (document.fullContent && document.fullContent.length > 50) {
+                const words = document.fullContent.split(/\s+/).filter(word => word.length > 3);
+                if (words.length > 10) {
+                    questions.push({
+                        question: `Approximately how many words are in this document?`,
+                        options: [
+                            `${words.length} words`,
+                            `${Math.floor(words.length / 2)} words`,
+                            `${words.length * 2} words`,
+                            `${words.length + 50} words`
+                        ],
+                        correct: 0
+                    });
+                }
+            }
+
+            return questions;
         }
 
         function displayChallengeQuestions(questions) {
@@ -725,4 +813,5 @@
         init();
     </script>
 </body>
+</html>
 </html>
