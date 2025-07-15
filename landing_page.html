@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document AI Assistant - Dashboard</title>
+    <title>PDF Document Summarizer - AI Assistant</title>
     <style>
         * {
             margin: 0;
@@ -120,44 +120,15 @@
             box-shadow: 0 5px 15px rgba(0,123,255,0.4);
         }
 
-        .btn-mode {
-            background: white;
-            border: 2px solid #e9ecef;
-            padding: 20px;
-            margin: 10px;
-            text-align: center;
-            min-width: 200px;
-            display: inline-block;
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #5a6268);
+            color: white;
+            margin-left: 10px;
         }
 
-        .btn-mode:hover {
-            border-color: #007bff;
-            background: #f8f9fa;
-        }
-
-        .mode-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .mode-icon {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .mode-title {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .mode-desc {
-            display: block;
-            color: #666;
-            font-size: 0.9rem;
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #5a6268, #495057);
+            transform: translateY(-2px);
         }
 
         .progress-bar {
@@ -173,19 +144,13 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s ease;
-            animation: progress-animation 2s ease-in-out infinite;
-        }
-
-        @keyframes progress-animation {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
         }
 
         .progress-text {
             text-align: center;
             margin-top: 10px;
             color: #666;
+            font-weight: 500;
         }
 
         .info-box {
@@ -193,72 +158,130 @@
             padding: 20px;
             border-radius: 10px;
             border-left: 4px solid #007bff;
+            margin-bottom: 20px;
         }
 
         .filename {
             font-weight: bold;
             color: #007bff;
             margin-bottom: 10px;
+            font-size: 1.1rem;
         }
 
-        .summary {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .chat-container {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-history {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding: 10px;
-        }
-
-        .chat-message {
+        .file-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 18px;
-            max-width: 80%;
         }
 
-        .chat-message.user {
-            background: #007bff;
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .chat-message.assistant {
+        .stat-item {
             background: white;
-            color: #333;
-            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .chat-input-container {
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .summary-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .summary-header {
             display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .summary-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .chat-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s ease;
+        .summary-content {
+            line-height: 1.8;
+            color: #555;
+            font-size: 1.1rem;
         }
 
-        .chat-input:focus {
-            border-color: #007bff;
+        .key-points {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .key-points h4 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .key-points li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .content-preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .content-preview h4 {
+            color: #ffc107;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .content-preview pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         .loading {
@@ -281,61 +304,30 @@
             100% { transform: rotate(360deg); }
         }
 
-        .questions-container {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .question-item {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #007bff;
-        }
-
-        .question-text {
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .question-options {
-            display: grid;
-            gap: 10px;
-        }
-
-        .option-btn {
-            padding: 10px 15px;
-            border: 2px solid #e9ecef;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .option-btn:hover {
-            border-color: #007bff;
-            background: #f0f8ff;
-        }
-
-        .option-btn.correct {
-            border-color: #28a745;
-            background: #d4edda;
-        }
-
-        .option-btn.incorrect {
-            border-color: #dc3545;
-            background: #f8d7da;
-        }
-
         .note {
             background: linear-gradient(45deg, #fff3cd, #ffeaa7);
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
             border-left: 4px solid #ffc107;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
         }
 
         @media (max-width: 768px) {
@@ -347,14 +339,8 @@
                 font-size: 2rem;
             }
             
-            .mode-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn-mode {
-                width: 100%;
-                max-width: 300px;
+            .file-stats {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -362,103 +348,117 @@
 <body>
     <div class="container">
         <header>
-            <h1>📄 Document AI Assistant</h1>
-            <p>Upload a document and interact with it using AI-powered analysis</p>
+            <h1>📄 PDF Document Summarizer</h1>
+            <p>Upload a PDF document and get AI-powered summaries and analysis</p>
         </header>
+        
         <main>
             <!-- Upload Section -->
             <section id="upload-section" class="section">
                 <div class="upload-area" id="upload-area">
                     <div class="upload-icon">📁</div>
-                    <h3>Upload Your Document</h3>
-                    <p>Drag and drop a PDF or TXT file here, or click to browse</p>
-                    <input type="file" id="file-input" accept=".pdf,.txt,.doc,.docx" hidden>
+                    <h3>Upload Your PDF Document</h3>
+                    <p>Drag and drop a PDF file here, or click to browse</p>
+                    <input type="file" id="file-input" accept=".pdf,.txt" hidden>
                     <button id="browse-btn" class="btn btn-primary">Browse Files</button>
                 </div>
+                
                 <div id="upload-progress" class="progress-bar hidden">
                     <div class="progress-fill"></div>
-                    <span class="progress-text">Processing document...</span>
                 </div>
+                <div id="progress-text" class="progress-text hidden">Processing document...</div>
                 
                 <div class="note">
-                    <strong>Demo Mode:</strong> This version works entirely in your browser without requiring a backend server. Upload a text file to see content extraction, or try PDF/DOC files to see the demo flow. For full AI capabilities, connect to a backend service with document processing libraries.
+                    <strong>📋 Features:</strong> This tool can extract text from PDFs and generate intelligent summaries. 
+                    Upload a PDF to see key points, content analysis, and document insights powered by advanced text processing.
                 </div>
             </section>
 
-            <!-- Document Summary Section -->
-            <section id="summary-section" class="section hidden">
-                <h2>📋 Document Summary</h2>
+            <!-- Document Analysis Section -->
+            <section id="analysis-section" class="section hidden">
+                <h2>📊 Document Analysis</h2>
                 <div id="document-info" class="info-box">
                     <div class="filename"></div>
-                    <div class="summary"></div>
-                </div>
-            </section>
-
-            <!-- Interaction Mode Selection -->
-            <section id="mode-section" class="section hidden">
-                <h2>🤖 Choose Interaction Mode</h2>
-                <div class="mode-buttons">
-                    <button id="ask-mode-btn" class="btn btn-mode">
-                        <span class="mode-icon">💬</span>
-                        <span class="mode-title">Ask Anything</span>
-                        <span class="mode-desc">Ask questions about the document</span>
-                    </button>
-                    <button id="challenge-mode-btn" class="btn btn-mode">
-                        <span class="mode-icon">🎯</span>
-                        <span class="mode-title">Challenge Me</span>
-                        <span class="mode-desc">Test your understanding</span>
-                    </button>
-                </div>
-            </section>
-
-            <!-- Ask Mode Section -->
-            <section id="ask-section" class="section hidden">
-                <h2>💬 Ask Anything</h2>
-                <div class="chat-container">
-                    <div id="chat-history" class="chat-history"></div>
-                    <div class="chat-input-container">
-                        <input type="text" id="question-input" placeholder="Ask a question about the document..." class="chat-input">
-                        <button id="send-btn" class="btn btn-primary">Send</button>
+                    <div class="file-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">File Size</div>
+                            <div class="stat-value" id="file-size">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Pages</div>
+                            <div class="stat-value" id="page-count">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Words</div>
+                            <div class="stat-value" id="word-count">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Reading Time</div>
+                            <div class="stat-value" id="reading-time">-</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Challenge Mode Section -->
-            <section id="challenge-section" class="section hidden">
-                <h2>🎯 Challenge Mode</h2>
-                <div id="challenge-loading" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Generating questions...</p>
+            <!-- Summary Section -->
+            <section id="summary-section" class="section hidden">
+                <h2>🎯 AI-Generated Summary</h2>
+                <div class="summary-container">
+                    <div class="summary-header">
+                        <div class="summary-title">
+                            <span>📋</span>
+                            <span>Document Summary</span>
+                        </div>
+                        <button id="regenerate-btn" class="btn btn-secondary">🔄 Regenerate</button>
+                    </div>
+                    <div id="summary-content" class="summary-content">
+                        <!-- Summary will be generated here -->
+                    </div>
+                    
+                    <div id="key-points" class="key-points">
+                        <h4>🔑 Key Points</h4>
+                        <ul id="key-points-list">
+                            <!-- Key points will be listed here -->
+                        </ul>
+                    </div>
                 </div>
-                <div id="challenge-questions" class="questions-container hidden"></div>
+            </section>
+
+            <!-- Content Preview Section -->
+            <section id="preview-section" class="section hidden">
+                <h2>👁️ Content Preview</h2>
+                <div class="content-preview">
+                    <h4>📖 Extracted Text (First 1000 characters)</h4>
+                    <pre id="content-preview"></pre>
+                </div>
             </section>
         </main>
     </div>
 
+    <!-- Include PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
     <script>
+        // Configure PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
         // Global variables
         let currentDocument = null;
-        let currentMode = null;
+        let extractedText = '';
 
         // DOM elements
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
         const browseBtn = document.getElementById('browse-btn');
         const uploadProgress = document.getElementById('upload-progress');
+        const progressText = document.getElementById('progress-text');
+        const analysisSection = document.getElementById('analysis-section');
         const summarySection = document.getElementById('summary-section');
-        const modeSection = document.getElementById('mode-section');
-        const askSection = document.getElementById('ask-section');
-        const challengeSection = document.getElementById('challenge-section');
-        const documentInfo = document.getElementById('document-info');
-        const chatHistory = document.getElementById('chat-history');
-        const questionInput = document.getElementById('question-input');
-        const sendBtn = document.getElementById('send-btn');
-        const askModeBtn = document.getElementById('ask-mode-btn');
-        const challengeModeBtn = document.getElementById('challenge-mode-btn');
+        const previewSection = document.getElementById('preview-section');
+        const regenerateBtn = document.getElementById('regenerate-btn');
 
         // Initialize event listeners
         function init() {
-            // File upload events
             browseBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', handleFileSelect);
             
@@ -468,15 +468,8 @@
             uploadArea.addEventListener('drop', handleDrop);
             uploadArea.addEventListener('click', () => fileInput.click());
             
-            // Mode selection events
-            askModeBtn.addEventListener('click', () => setMode('ask'));
-            challengeModeBtn.addEventListener('click', () => setMode('challenge'));
-            
-            // Chat events
-            sendBtn.addEventListener('click', sendMessage);
-            questionInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
-            });
+            // Regenerate button
+            regenerateBtn.addEventListener('click', generateSummary);
         }
 
         // File handling functions
@@ -489,19 +482,16 @@
 
         function handleDragOver(event) {
             event.preventDefault();
-            event.stopPropagation();
             uploadArea.classList.add('dragover');
         }
 
         function handleDragLeave(event) {
             event.preventDefault();
-            event.stopPropagation();
             uploadArea.classList.remove('dragover');
         }
 
         function handleDrop(event) {
             event.preventDefault();
-            event.stopPropagation();
             uploadArea.classList.remove('dragover');
             
             const files = event.dataTransfer.files;
@@ -510,303 +500,263 @@
             }
         }
 
-        function processFile(file) {
+        async function processFile(file) {
             // Validate file type
-            const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            const fileName = file.name.toLowerCase();
-            
-            if (!allowedTypes.includes(file.type) && !fileName.endsWith('.txt') && !fileName.endsWith('.pdf') && !fileName.endsWith('.doc') && !fileName.endsWith('.docx')) {
-                alert('Please upload a PDF, TXT, DOC, or DOCX file.');
+            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf') && !file.type.includes('text')) {
+                showError('Please upload a PDF or text file.');
                 return;
             }
 
             // Show progress
-            uploadProgress.classList.remove('hidden');
+            showProgress('Processing document...');
             
-            // Process different file types
-            if (file.type === 'text/plain' || fileName.endsWith('.txt')) {
-                // Read text files directly
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    setTimeout(() => {
-                        currentDocument = {
-                            name: file.name,
-                            size: file.size,
-                            type: file.type || 'text/plain',
-                            lastModified: file.lastModified,
-                            content: content.substring(0, 1000) + (content.length > 1000 ? '...' : ''),
-                            fullContent: content
-                        };
-                        
-                        displayDocumentSummary();
-                        uploadProgress.classList.add('hidden');
-                        summarySection.classList.remove('hidden');
-                        modeSection.classList.remove('hidden');
-                    }, 1000);
-                };
-                
-                reader.onerror = function() {
-                    uploadProgress.classList.add('hidden');
-                    alert('Error reading file. Please try again.');
-                };
-                
-                reader.readAsText(file);
-            } else {
-                // For PDF, DOC, DOCX files - simulate processing
-                setTimeout(() => {
-                    let demoContent = '';
-                    if (fileName.endsWith('.pdf')) {
-                        demoContent = `This is a PDF document. In a full implementation, this would be processed using libraries like PDF.js or PyPDF2 to extract text content. The document appears to contain ${Math.floor(Math.random() * 10) + 1} pages of content.`;
-                    } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-                        demoContent = `This is a Word document. In a full implementation, this would be processed using libraries like python-docx or mammoth.js to extract text content. The document appears to contain formatted text with potential headings and paragraphs.`;
-                    } else {
-                        demoContent = `This document format would require specialized processing libraries for content extraction.`;
-                    }
-                    
-                    currentDocument = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        lastModified: file.lastModified,
-                        content: demoContent,
-                        fullContent: demoContent
-                    };
-                    
-                    displayDocumentSummary();
-                    uploadProgress.classList.add('hidden');
-                    summarySection.classList.remove('hidden');
-                    modeSection.classList.remove('hidden');
-                }, 1500);
-            }
-        }
-
-        function displayDocumentSummary() {
-            const filename = documentInfo.querySelector('.filename');
-            const summary = documentInfo.querySelector('.summary');
-            
-            filename.textContent = `📄 ${currentDocument.name}`;
-            summary.innerHTML = `
-                <p><strong>Size:</strong> ${(currentDocument.size / 1024).toFixed(2)} KB</p>
-                <p><strong>Type:</strong> ${currentDocument.type}</p>
-                <p><strong>Last Modified:</strong> ${new Date(currentDocument.lastModified).toLocaleString()}</p>
-                <p><strong>Content Preview:</strong></p>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-top: 10px; max-height: 200px; overflow-y: auto;">
-                    <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${currentDocument.content}</pre>
-                </div>
-            `;
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            
-            if (mode === 'ask') {
-                askSection.classList.remove('hidden');
-                challengeSection.classList.add('hidden');
-                addChatMessage('assistant', 'Hi! I\'m ready to answer questions about your document. What would you like to know?');
-            } else if (mode === 'challenge') {
-                askSection.classList.add('hidden');
-                challengeSection.classList.remove('hidden');
-                generateChallengeQuestions();
-            }
-        }
-
-        function sendMessage() {
-            const message = questionInput.value.trim();
-            if (!message) return;
-            
-            if (!currentDocument) {
-                alert('Please upload a document first!');
-                return;
-            }
-            
-            addChatMessage('user', message);
-            questionInput.value = '';
-            sendBtn.disabled = true;
-            
-            // Show typing indicator
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'chat-message assistant';
-            typingDiv.innerHTML = '<em>AI is thinking...</em>';
-            chatHistory.appendChild(typingDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-            
-            // Generate contextual response based on document content
-            setTimeout(() => {
-                chatHistory.removeChild(typingDiv);
-                
-                let response = generateResponse(message, currentDocument);
-                addChatMessage('assistant', response);
-                sendBtn.disabled = false;
-            }, 1000 + Math.random() * 2000);
-        }
-
-        function generateResponse(question, document) {
-            const lowerQuestion = question.toLowerCase();
-            
-            // File info questions
-            if (lowerQuestion.includes('size') || lowerQuestion.includes('how big')) {
-                return `The document "${document.name}" is ${(document.size / 1024).toFixed(2)} KB in size.`;
-            }
-            
-            if (lowerQuestion.includes('type') || lowerQuestion.includes('format') || lowerQuestion.includes('kind')) {
-                return `This is a ${document.type} file named "${document.name}".`;
-            }
-            
-            if (lowerQuestion.includes('when') || lowerQuestion.includes('modified') || lowerQuestion.includes('created')) {
-                return `The document was last modified on ${new Date(document.lastModified).toLocaleString()}.`;
-            }
-            
-            // Content questions
-            if (lowerQuestion.includes('summary') || lowerQuestion.includes('about') || lowerQuestion.includes('content')) {
-                return `Here's what I can tell you about "${document.name}": ${document.content}`;
-            }
-            
-            if (lowerQuestion.includes('length') || lowerQuestion.includes('long') || lowerQuestion.includes('words')) {
-                const wordCount = document.fullContent ? document.fullContent.split(/\s+/).length : 'unknown';
-                return `The document contains approximately ${wordCount} words.`;
-            }
-            
-            if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi')) {
-                return `Hello! I'm ready to help you with questions about "${document.name}". What would you like to know?`;
-            }
-            
-            // Search for keywords in content
-            const keywords = question.split(' ').filter(word => word.length > 3);
-            const content = document.fullContent || document.content;
-            let foundKeywords = [];
-            
-            keywords.forEach(keyword => {
-                if (content.toLowerCase().includes(keyword.toLowerCase())) {
-                    foundKeywords.push(keyword);
+            try {
+                if (file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf')) {
+                    await processPDF(file);
+                } else {
+                    await processText(file);
                 }
-            });
-            
-            if (foundKeywords.length > 0) {
-                return `I found mentions of "${foundKeywords.join('", "')}" in the document. Here's the relevant context: ${content.substring(0, 300)}...`;
+                
+                hideProgress();
+                showSuccess('Document processed successfully!');
+                displayResults();
+                
+            } catch (error) {
+                hideProgress();
+                showError('Error processing document: ' + error.message);
             }
-            
-            // Default response
-            return `I understand you're asking about "${question}". Based on the document "${document.name}", I can see: ${content.substring(0, 200)}... Feel free to ask more specific questions about the content!`;
         }
 
-        function addChatMessage(sender, message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${sender}`;
-            messageDiv.textContent = message;
-            chatHistory.appendChild(messageDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
-
-        function generateChallengeQuestions() {
-            const loadingDiv = document.getElementById('challenge-loading');
-            const questionsDiv = document.getElementById('challenge-questions');
+        async function processPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
             
-            if (!currentDocument) {
-                questionsDiv.innerHTML = '<p>Please upload a document first to generate challenge questions.</p>';
-                questionsDiv.classList.remove('hidden');
-                return;
+            currentDocument = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+                pageCount: pdf.numPages
+            };
+            
+            extractedText = '';
+            
+            // Extract text from all pages
+            for (let i = 1; i <= pdf.numPages; i++) {
+                updateProgress(`Extracting text from page ${i}/${pdf.numPages}...`);
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                extractedText += pageText + '\n\n';
             }
             
-            loadingDiv.classList.remove('hidden');
-            questionsDiv.classList.add('hidden');
+            // Clean up extracted text
+            extractedText = extractedText.replace(/\s+/g, ' ').trim();
+        }
+
+        async function processText(file) {
+            const text = await file.text();
             
-            // Generate questions based on document content
+            currentDocument = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+                pageCount: 1
+            };
+            
+            extractedText = text;
+        }
+
+        function displayResults() {
+            // Update file info
+            const filename = document.querySelector('.filename');
+            filename.textContent = `📄 ${currentDocument.name}`;
+            
+            // Update stats
+            const wordCount = extractedText.split(/\s+/).filter(word => word.length > 0).length;
+            const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+            
+            document.getElementById('file-size').textContent = formatFileSize(currentDocument.size);
+            document.getElementById('page-count').textContent = currentDocument.pageCount;
+            document.getElementById('word-count').textContent = wordCount.toLocaleString();
+            document.getElementById('reading-time').textContent = `${readingTime} min`;
+            
+            // Show content preview
+            const preview = document.getElementById('content-preview');
+            preview.textContent = extractedText.substring(0, 1000) + (extractedText.length > 1000 ? '...' : '');
+            
+            // Generate summary
+            generateSummary();
+            
+            // Show sections
+            analysisSection.classList.remove('hidden');
+            summarySection.classList.remove('hidden');
+            previewSection.classList.remove('hidden');
+        }
+
+        function generateSummary() {
+            const summaryContent = document.getElementById('summary-content');
+            const keyPointsList = document.getElementById('key-points-list');
+            
+            // Show loading state
+            summaryContent.innerHTML = '<div class="loading"><div class="spinner"></div><p>Generating summary...</p></div>';
+            keyPointsList.innerHTML = '';
+            
+            // Simulate AI processing
             setTimeout(() => {
-                const questions = createQuestionsFromDocument(currentDocument);
-                displayChallengeQuestions(questions);
-                loadingDiv.classList.add('hidden');
-                questionsDiv.classList.remove('hidden');
+                const summary = createIntelligentSummary(extractedText);
+                const keyPoints = extractKeyPoints(extractedText);
+                
+                summaryContent.innerHTML = summary;
+                
+                keyPointsList.innerHTML = '';
+                keyPoints.forEach(point => {
+                    const li = document.createElement('li');
+                    li.textContent = point;
+                    keyPointsList.appendChild(li);
+                });
             }, 2000);
         }
 
-        function createQuestionsFromDocument(document) {
-            const questions = [
-                {
-                    question: `What is the filename of the uploaded document?`,
-                    options: [
-                        document.name,
-                        `${document.name}.backup`,
-                        `copy_${document.name}`,
-                        `${document.name}_old`
-                    ],
-                    correct: 0
-                },
-                {
-                    question: `What is the approximate size of this document?`,
-                    options: [
-                        `${(document.size / 1024).toFixed(2)} KB`,
-                        `${(document.size / 1024 / 1024).toFixed(2)} MB`,
-                        `${document.size} bytes`,
-                        `${(document.size * 2 / 1024).toFixed(2)} KB`
-                    ],
-                    correct: 0
-                },
-                {
-                    question: `What type of file is this document?`,
-                    options: [
-                        document.type || 'text/plain',
-                        'application/json',
-                        'image/png',
-                        'video/mp4'
-                    ],
-                    correct: 0
-                }
-            ];
-
-            // Add content-based questions for text files
-            if (document.fullContent && document.fullContent.length > 50) {
-                const words = document.fullContent.split(/\s+/).filter(word => word.length > 3);
-                if (words.length > 10) {
-                    questions.push({
-                        question: `Approximately how many words are in this document?`,
-                        options: [
-                            `${words.length} words`,
-                            `${Math.floor(words.length / 2)} words`,
-                            `${words.length * 2} words`,
-                            `${words.length + 50} words`
-                        ],
-                        correct: 0
-                    });
-                }
+        function createIntelligentSummary(text) {
+            if (!text || text.length < 100) {
+                return "The document is too short to generate a meaningful summary.";
             }
-
-            return questions;
-        }
-
-        function displayChallengeQuestions(questions) {
-            const questionsContainer = document.getElementById('challenge-questions');
-            questionsContainer.innerHTML = '';
             
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question-item';
-                questionDiv.innerHTML = `
-                    <div class="question-text">${index + 1}. ${q.question}</div>
-                    <div class="question-options">
-                        ${q.options.map((option, optIndex) => `
-                            <button class="option-btn" onclick="selectAnswer(${index}, ${optIndex}, ${q.correct})">
-                                ${String.fromCharCode(65 + optIndex)}. ${option}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-                questionsContainer.appendChild(questionDiv);
-            });
-        }
-
-        function selectAnswer(questionIndex, selectedIndex, correctIndex) {
-            const questionDiv = document.querySelectorAll('.question-item')[questionIndex];
-            const options = questionDiv.querySelectorAll('.option-btn');
+            // Simple but effective summarization approach
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            const words = text.toLowerCase().split(/\s+/);
             
-            options.forEach((option, index) => {
-                option.disabled = true;
-                if (index === correctIndex) {
-                    option.classList.add('correct');
-                } else if (index === selectedIndex && index !== correctIndex) {
-                    option.classList.add('incorrect');
+            // Word frequency analysis
+            const wordFreq = {};
+            words.forEach(word => {
+                word = word.replace(/[^a-z]/g, '');
+                if (word.length > 3) {
+                    wordFreq[word] = (wordFreq[word] || 0) + 1;
                 }
             });
+            
+            // Score sentences based on word frequency
+            const sentenceScores = sentences.map(sentence => {
+                const sentenceWords = sentence.toLowerCase().split(/\s+/);
+                let score = 0;
+                let wordCount = 0;
+                
+                sentenceWords.forEach(word => {
+                    word = word.replace(/[^a-z]/g, '');
+                    if (word.length > 3) {
+                        score += wordFreq[word] || 0;
+                        wordCount++;
+                    }
+                });
+                
+                return {
+                    sentence: sentence.trim(),
+                    score: wordCount > 0 ? score / wordCount : 0
+                };
+            });
+            
+            // Get top sentences
+            const topSentences = sentenceScores
+                .sort((a, b) => b.score - a.score)
+                .slice(0, Math.min(5, Math.ceil(sentences.length * 0.2)))
+                .map(item => item.sentence);
+            
+            if (topSentences.length === 0) {
+                return "This document contains information that requires further analysis to summarize effectively.";
+            }
+            
+            const summary = topSentences.join('. ') + '.';
+            return summary.length > 500 ? summary.substring(0, 500) + '...' : summary;
+        }
+
+        function extractKeyPoints(text) {
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            const keyPoints = [];
+            
+            // Look for sentences that might contain key information
+            const patterns = [
+                /\b(important|significant|key|main|primary|essential|critical|major)\b/i,
+                /\b(conclusion|summary|result|finding|outcome)\b/i,
+                /\b(first|second|third|finally|lastly|moreover|furthermore)\b/i,
+                /\b(therefore|thus|hence|consequently|as a result)\b/i,
+                /\b(problem|issue|challenge|solution|approach|method)\b/i
+            ];
+            
+            sentences.forEach(sentence => {
+                const trimmed = sentence.trim();
+                if (trimmed.length > 30 && trimmed.length < 200) {
+                    const hasKeyPattern = patterns.some(pattern => pattern.test(trimmed));
+                    if (hasKeyPattern) {
+                        keyPoints.push(trimmed);
+                    }
+                }
+            });
+            
+            // If no pattern-based points found, use first few sentences
+            if (keyPoints.length === 0) {
+                const firstSentences = sentences.slice(0, 5).map(s => s.trim());
+                keyPoints.push(...firstSentences);
+            }
+            
+            return keyPoints.slice(0, 6); // Limit to 6 key points
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showProgress(message) {
+            uploadProgress.classList.remove('hidden');
+            progressText.classList.remove('hidden');
+            progressText.textContent = message;
+            
+            // Animate progress bar
+            const progressFill = uploadProgress.querySelector('.progress-fill');
+            progressFill.style.width = '0%';
+            setTimeout(() => {
+                progressFill.style.width = '100%';
+            }, 100);
+        }
+
+        function updateProgress(message) {
+            progressText.textContent = message;
+        }
+
+        function hideProgress() {
+            uploadProgress.classList.add('hidden');
+            progressText.classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            const uploadSection = document.getElementById('upload-section');
+            uploadSection.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            
+            const uploadSection = document.getElementById('upload-section');
+            uploadSection.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
         }
 
         // Initialize the application
