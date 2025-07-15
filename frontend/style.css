@@ -290,7 +290,7 @@ header p {
 
 .question-header {
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
 }
@@ -309,7 +309,6 @@ header p {
     border-radius: 10px;
     font-size: 0.8em;
     color: #666;
-    margin-left: auto;
 }
 
 .question-text {
