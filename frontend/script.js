@@ -12,38 +12,71 @@ class DocumentAIAssistant {
         const browseBtn = document.getElementById('browse-btn');
         const uploadArea = document.getElementById('upload-area');
 
-        browseBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => this.handleFileUpload(e.target.files[0]));
+        if (browseBtn) {
+            browseBtn.addEventListener('click', () => fileInput.click());
+        }
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => this.handleFileUpload(e.target.files[0]));
+        }
 
         // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
-        uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-        uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+            uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+            uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+        }
 
         // Mode selection
-        document.getElementById('ask-mode-btn').addEventListener('click', () => this.setMode('ask'));
-        document.getElementById('challenge-mode-btn').addEventListener('click', () => this.setMode('challenge'));
+        const askModeBtn = document.getElementById('ask-mode-btn');
+        const challengeModeBtn = document.getElementById('challenge-mode-btn');
+        
+        if (askModeBtn) {
+            askModeBtn.addEventListener('click', () => this.setMode('ask'));
+        }
+        
+        if (challengeModeBtn) {
+            challengeModeBtn.addEventListener('click', () => this.setMode('challenge'));
+        }
 
         // Chat functionality
-        document.getElementById('send-btn').addEventListener('click', () => this.sendQuestion());
-        document.getElementById('question-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendQuestion();
-        });
+        const sendBtn = document.getElementById('send-btn');
+        const questionInput = document.getElementById('question-input');
+        
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.sendQuestion());
+        }
+        
+        if (questionInput) {
+            questionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.sendQuestion();
+            });
+        }
     }
 
     handleDragOver(e) {
         e.preventDefault();
-        document.getElementById('upload-area').classList.add('dragover');
+        const uploadArea = document.getElementById('upload-area');
+        if (uploadArea) {
+            uploadArea.classList.add('dragover');
+        }
     }
 
     handleDragLeave(e) {
         e.preventDefault();
-        document.getElementById('upload-area').classList.remove('dragover');
+        const uploadArea = document.getElementById('upload-area');
+        if (uploadArea) {
+            uploadArea.classList.remove('dragover');
+        }
     }
 
     handleDrop(e) {
         e.preventDefault();
-        document.getElementById('upload-area').classList.remove('dragover');
+        const uploadArea = document.getElementById('upload-area');
+        if (uploadArea) {
+            uploadArea.classList.remove('dragover');
+        }
+        
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             this.handleFileUpload(files[0]);
@@ -87,48 +120,76 @@ class DocumentAIAssistant {
 
     showProgress(show) {
         const progressBar = document.getElementById('upload-progress');
-        if (show) {
-            progressBar.classList.remove('hidden');
-        } else {
-            progressBar.classList.add('hidden');
+        if (progressBar) {
+            if (show) {
+                progressBar.classList.remove('hidden');
+            } else {
+                progressBar.classList.add('hidden');
+            }
         }
     }
 
     displayDocumentSummary(filename, summary) {
         const summarySection = document.getElementById('summary-section');
-        const filenameEl = summarySection.querySelector('.filename');
-        const summaryEl = summarySection.querySelector('.summary');
+        if (summarySection) {
+            const filenameEl = summarySection.querySelector('.filename');
+            const summaryEl = summarySection.querySelector('.summary');
 
-        filenameEl.textContent = `📄 ${filename}`;
-        summaryEl.textContent = summary;
+            if (filenameEl) {
+                filenameEl.textContent = `📄 ${filename}`;
+            }
+            
+            if (summaryEl) {
+                summaryEl.textContent = summary;
+            }
 
-        summarySection.classList.remove('hidden');
+            summarySection.classList.remove('hidden');
+        }
     }
 
     showModeSelection() {
-        document.getElementById('mode-section').classList.remove('hidden');
+        const modeSection = document.getElementById('mode-section');
+        if (modeSection) {
+            modeSection.classList.remove('hidden');
+        }
     }
 
     setMode(mode) {
         this.currentMode = mode;
         
         // Hide all mode sections
-        document.getElementById('ask-section').classList.add('hidden');
-        document.getElementById('challenge-section').classList.add('hidden');
+        const askSection = document.getElementById('ask-section');
+        const challengeSection = document.getElementById('challenge-section');
+        
+        if (askSection) {
+            askSection.classList.add('hidden');
+        }
+        
+        if (challengeSection) {
+            challengeSection.classList.add('hidden');
+        }
 
         if (mode === 'ask') {
-            document.getElementById('ask-section').classList.remove('hidden');
-            document.getElementById('question-input').focus();
+            if (askSection) {
+                askSection.classList.remove('hidden');
+            }
+            const questionInput = document.getElementById('question-input');
+            if (questionInput) {
+                questionInput.focus();
+            }
         } else if (mode === 'challenge') {
-            document.getElementById('challenge-section').classList.remove('hidden');
+            if (challengeSection) {
+                challengeSection.classList.remove('hidden');
+            }
             this.generateChallengeQuestions();
         }
     }
 
     async sendQuestion() {
         const input = document.getElementById('question-input');
-        const question = input.value.trim();
+        if (!input) return;
         
+        const question = input.value.trim();
         if (!question) return;
 
         this.addMessageToChat('user', question);
@@ -167,6 +228,8 @@ class DocumentAIAssistant {
 
     addMessageToChat(sender, content, justification = '', isLoading = false) {
         const chatHistory = document.getElementById('chat-history');
+        if (!chatHistory) return;
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${sender}`;
         
@@ -201,8 +264,13 @@ class DocumentAIAssistant {
         const loadingDiv = document.getElementById('challenge-loading');
         const questionsDiv = document.getElementById('challenge-questions');
         
-        loadingDiv.classList.remove('hidden');
-        questionsDiv.classList.add('hidden');
+        if (loadingDiv) {
+            loadingDiv.classList.remove('hidden');
+        }
+        
+        if (questionsDiv) {
+            questionsDiv.classList.add('hidden');
+        }
 
         try {
             const response = await fetch('/challenge', {
@@ -226,12 +294,16 @@ class DocumentAIAssistant {
         } catch (error) {
             this.showError('Error generating questions: ' + error.message);
         } finally {
-            loadingDiv.classList.add('hidden');
+            if (loadingDiv) {
+                loadingDiv.classList.add('hidden');
+            }
         }
     }
 
     displayChallengeQuestions() {
         const questionsDiv = document.getElementById('challenge-questions');
+        if (!questionsDiv) return;
+        
         questionsDiv.innerHTML = '';
 
         this.challengeQuestions.forEach((question, index) => {
@@ -270,6 +342,8 @@ class DocumentAIAssistant {
 
     async submitAnswer(questionIndex) {
         const answerInput = document.getElementById(`answer-${questionIndex}`);
+        if (!answerInput) return;
+        
         const answer = answerInput.value.trim();
 
         if (!answer) {
@@ -278,8 +352,10 @@ class DocumentAIAssistant {
         }
 
         const submitBtn = answerInput.parentElement.querySelector('.btn-submit');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Evaluating...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Evaluating...';
+        }
 
         try {
             const response = await fetch('/evaluate', {
@@ -304,13 +380,17 @@ class DocumentAIAssistant {
         } catch (error) {
             this.showError('Error evaluating answer: ' + error.message);
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Answer';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Answer';
+            }
         }
     }
 
     displayEvaluation(questionIndex, evaluation, correctAnswer) {
         const evaluationDiv = document.getElementById(`evaluation-${questionIndex}`);
+        if (!evaluationDiv) return;
+        
         const scoreClass = evaluation.score.toLowerCase().replace(' ', '-');
 
         evaluationDiv.innerHTML = `
